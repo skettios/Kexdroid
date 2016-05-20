@@ -143,6 +143,7 @@ public class HaxClient implements Runnable
             case US_5_5_0:
             case US_5_5_1:
             case EU_5_5_0:
+            case EU_5_5_1:
                 System.out.println(systemVersion.name());
                 writeHeader(writer, "video/mp4");
                 Stagefright.serveHax(out, systemVersion, header, payloadName + ".bin");

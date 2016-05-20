@@ -1,7 +1,5 @@
 package com.skettios.kexdroid;
 
-import android.widget.TextView;
-
 import java.io.IOException;
 import java.net.BindException;
 import java.net.ServerSocket;
@@ -9,8 +7,6 @@ import java.net.Socket;
 
 public class HaxServer implements Runnable
 {
-    public volatile boolean isRunning = false;
-
     @Override
     public void run()
     {
@@ -20,7 +16,7 @@ public class HaxServer implements Runnable
 
             long clientCount = 0L;
 
-            while(isRunning)
+            while (true)
             {
                 Socket socket = server.accept();
 
@@ -33,12 +29,8 @@ public class HaxServer implements Runnable
                 stringBuilder.append(clientCount++);
                 thread.setName(stringBuilder.toString());
 
-                System.out.println("YEA");
-
                 thread.start();
             }
-
-            server.close();
         }
         catch (BindException e)
         {

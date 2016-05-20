@@ -1,7 +1,6 @@
 package com.skettios.kexdroid;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.graphics.Color;
@@ -11,7 +10,6 @@ import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 
 import java.io.File;
@@ -25,9 +23,15 @@ import java.util.Enumeration;
 
 public class MainActivity extends AppCompatActivity
 {
-    public static Context context;
     private HaxServer server;
     private Thread serverThread;
+
+    public static final File external = Environment.getExternalStoragePublicDirectory("kexdroid");
+
+    static
+    {
+        external.mkdirs();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -37,49 +41,14 @@ public class MainActivity extends AppCompatActivity
         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.RED));
 
         String ipAddress = "";
-        System.out.println(Environment.getExternalStorageDirectory());
-        context = getApplicationContext();
-
 
         int permission = ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
         if (permission != PackageManager.PERMISSION_GRANTED)
-        {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-        }
 
-        File external = Environment.getExternalStoragePublicDirectory("kexdroid");
-        external.mkdirs();
-
-        try
-        {
-            AssetManager am = getAssets();
-            String[] list = am.list("");
-            for (String s : list)
-            {
-                if (s.equals("data") || s.equals("loaders") || s.equals("payloads"))
-                {
-                    File folder = new File(external + "/" + s);
-                    folder.mkdirs();
-
-                    String[] inner = am.list(s);
-                    for (String name : inner)
-                    {
-                        InputStream in = am.open(s + "/" + name);
-                        int size = in.available();
-                        byte[] buffer = new byte[size];
-                        in.read(buffer);
-                        in.close();
-                        FileOutputStream out = new FileOutputStream(folder + "/" + name);
-                        out.write(buffer);
-                        out.close();
-                    }
-                }
-            }
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
+        permission = ActivityCompat.checkSelfPermission(this, Manifest.permission.INTERNET);
+        if (permission != PackageManager.PERMISSION_GRANTED)
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.INTERNET}, 1);
 
         try
         {
@@ -101,22 +70,64 @@ public class MainActivity extends AppCompatActivity
 
         }
 
-        ((TextView) findViewById(R.id.ip_address)).setText("IP Address: " + ipAddress + ":1337");
+        ((TextView) findViewById(R.id.ip_address)).setText("IP Address\nhttp://" + ipAddress + ":1337/hax");
         server = new HaxServer();
-        serverThread = new Thread(server);
     }
 
 
+    private void copyLoaders()
+    {
+        try
+        {
+            AssetManager am = getAssets();
+            String[] rootAssetList = am.list("");
+            for (String s : rootAssetList)
+            {
+                if (s.equals("loaders"))
+                {
+                    File folder = new File(external + "/" + s);
+                    folder.mkdirs();
+
+                    String[] innerAssetList = am.list(s);
+                    for (String name : innerAssetList)
+                    {
+                        InputStream in = am.open(s + "/" + name);
+                        int size = in.available();
+                        byte[] buffer = new byte[size];
+                        in.read(buffer);
+                        in.close();
+                        FileOutputStream out = new FileOutputStream(folder + "/" + name);
+                        out.write(buffer);
+                        out.close();
+                    }
+                }
+            }
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
     public void startServer(View view)
     {
-        if (!server.isRunning)
-        {
-            serverThread = new Thread(server);
-            serverThread.start();
+        copyLoaders();
 
-            getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.GREEN));
-            ((Button) view.getRootView().findViewById(R.id.button)).setEnabled(false);
-            server.isRunning = true;
+        File payloads = new File(external, "payloads");
+        if (!payloads.exists() || payloads.listFiles().length == 0)
+        {
+            getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.YELLOW));
+            payloads.mkdir();
+            new DownloadFileTask(this).execute("https://github.com/dimok789/homebrew_launcher/releases/download/v1.2_RC3/homebrew_launcher.v1.2_webserver_files_RC3.zip");
         }
+        else
+        {
+            getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.GREEN));
+        }
+
+        serverThread = new Thread(server);
+        serverThread.start();
+
+        (view.getRootView().findViewById(R.id.button)).setEnabled(false);
     }
 }

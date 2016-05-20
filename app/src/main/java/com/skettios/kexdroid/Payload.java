@@ -11,17 +11,11 @@ public class Payload
     private static final File payloadDir = new File(Environment.getExternalStoragePublicDirectory("kexdroid") + "/payloads");
     private static final File loaderDir = new File(Environment.getExternalStoragePublicDirectory("kexdroid") + "/loaders");
 
-    static
-    {
-        payloadDir.mkdirs();
-        loaderDir.mkdirs();
-    }
-
-    public static byte[] generatePayload(SystemVersions systemVersion, String payloadName) throws Exception
+    public static byte[] generatePayload(SystemVersions systemVersion) throws Exception
     {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-        byte[] payload = Util.readFile(new File(payloadDir, payloadName));
+        byte[] payload = Util.readFile(new File(payloadDir, systemVersion.payloadName));
         byte[] loader = Util.readFile(new File(loaderDir, systemVersion.loaderName));
 
         int padding = 0;

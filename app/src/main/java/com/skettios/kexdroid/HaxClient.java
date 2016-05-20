@@ -11,9 +11,6 @@ import java.util.List;
 public class HaxClient implements Runnable
 {
     private final Socket socket;
-//    private final TextView exploits;
-//    private final TextView data;
-//    private final TextView errors;
     private static final File dataFile = new File("src/main/data");
 
     static
@@ -21,12 +18,9 @@ public class HaxClient implements Runnable
         dataFile.mkdirs();
     }
 
-    public HaxClient(Socket socket, TextView exploits, TextView data, TextView errors)
+    public HaxClient(Socket socket)
     {
         this.socket = socket;
-//        this.exploits = exploits;
-//        this.data = data;
-//        this.errors = errors;
     }
 
     public void run()
@@ -140,12 +134,15 @@ public class HaxClient implements Runnable
             case EU_2_1_0:
             case EU_4_0_0:
             case EU_5_0_0:
+            case EU_5_1_0:
             case JP_4_0_0:
             case JP_5_0_0:
             case JP_5_1_0:
             case US_5_0_0:
             case US_5_1_0:
+            case US_5_5_0:
             case US_5_5_1:
+            case EU_5_5_0:
                 System.out.println(systemVersion.name());
                 writeHeader(writer, "video/mp4");
                 Stagefright.serveHax(out, systemVersion, header, payloadName + ".bin");
@@ -180,9 +177,3 @@ public class HaxClient implements Runnable
         return new HTTPRequest(method, protocol, path, props);
     }
 }
-
-
-/* Location:              D:\Libraries\Desktop\wii u exploit server\HaxServer.jar!\com\gudenau\haxserver\HaxClient.class
- * Java compiler version: 8 (52.0)
- * JD-Core Version:       0.7.1
- */

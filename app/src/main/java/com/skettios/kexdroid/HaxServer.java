@@ -9,43 +9,36 @@ import java.net.Socket;
 
 public class HaxServer implements Runnable
 {
-    private final TextView exploits;
-    private final TextView errors;
-    private final TextView data;
-
-    public HaxServer(TextView exploits, TextView errors, TextView data)
-    {
-        this.exploits = exploits;
-        this.errors = errors;
-        this.data = data;
-    }
+    public volatile boolean isRunning = false;
 
     @Override
     public void run()
     {
         try
         {
-            ServerSocket server = new ServerSocket(25565);
+            ServerSocket server = new ServerSocket(1337);
 
             long clientCount = 0L;
 
-            while(true)
+            while(isRunning)
             {
                 Socket socket = server.accept();
 
-                HaxClient client = new HaxClient(socket, exploits, errors, data);
+                HaxClient client = new HaxClient(socket);
                 Thread thread = new Thread(client);
                 thread.setDaemon(true);
-
 
                 StringBuilder stringBuilder = new StringBuilder();
                 stringBuilder.append("clientThread-");
                 stringBuilder.append(clientCount++);
                 thread.setName(stringBuilder.toString());
 
+                System.out.println("YEA");
 
                 thread.start();
             }
+
+            server.close();
         }
         catch (BindException e)
         {

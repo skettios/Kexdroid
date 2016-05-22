@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity
             String[] rootAssetList = am.list("");
             for (String s : rootAssetList)
             {
-                if (s.equals("loaders") || s.equals("payloads"))
+                if (s.equals("loaders"))
                 {
                     File folder = new File(external + "/" + s);
                     folder.mkdirs();

@@ -1,6 +1,5 @@
 package com.skettios.kexdroid.server;
 
-import android.os.Environment;
 import com.skettios.kexdroid.MainActivity;
 import com.skettios.kexdroid.util.SystemVersions;
 import com.skettios.kexdroid.util.Util;
@@ -23,11 +22,11 @@ public class Payload
             payloadDir.mkdir();
     }
 
-    public static byte[] generatePayload(SystemVersions systemVersion) throws Exception
+    public static byte[] generatePayload(SystemVersions systemVersion, String payloadName) throws Exception
     {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-        byte[] payload = Util.readFile(new File(payloadDir, systemVersion.payloadName));
+        byte[] payload = Util.readFile(new File(payloadDir, payloadName));
         byte[] loader = Util.readFile(new File(loaderDir, systemVersion.loaderName));
 
         int padding = 0;

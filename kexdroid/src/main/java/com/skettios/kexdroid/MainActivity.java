@@ -70,6 +70,8 @@ public class MainActivity extends AppCompatActivity
             e.printStackTrace();
         }
 
+
+
         ((TextView) findViewById(R.id.ip_address)).setText("IP Address\nhttp://" + ipAddress + ":1337/hax");
         server = new HaxServer();
     }
@@ -82,7 +84,7 @@ public class MainActivity extends AppCompatActivity
             String[] rootAssetList = am.list("");
             for (String s : rootAssetList)
             {
-                if (s.equals("loaders"))
+                if (s.equals("loaders") || s.equals("payloads"))
                 {
                     File folder = new File(external + "/" + s);
                     folder.mkdirs();
@@ -113,11 +115,11 @@ public class MainActivity extends AppCompatActivity
         copyLoaders();
 
         File payloads = new File(external, "payloads");
-        if (!payloads.exists() || payloads.listFiles().length == 0)
+        if (!payloads.exists() || payloads.listFiles().length <= 3)
         {
             payloads.mkdir();
             getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.YELLOW));
-            new DownloadFileTask(this).execute("https://github.com/dimok789/homebrew_launcher/releases/download/v1.2_RC3/homebrew_launcher.v1.2_webserver_files_RC3.zip");
+            new DownloadFileTask(this, "hbl", "loadiine").execute("https://github.com/dimok789/homebrew_launcher/releases/download/v1.2_RC3/homebrew_launcher.v1.2_webserver_files_RC3.zip", "https://github.com/dimok789/loadiine_gx2/releases/download/Loadiine-nightly-195aaab/loadiine_gx2_195aaab.zip");
         }
         else
         {

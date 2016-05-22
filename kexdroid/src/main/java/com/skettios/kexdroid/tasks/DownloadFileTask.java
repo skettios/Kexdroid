@@ -18,10 +18,12 @@ import static com.skettios.kexdroid.MainActivity.external;
 public class DownloadFileTask extends AsyncTask<String, String, String>
 {
     private final Activity activity;
+    private final String[] prefixes;
 
-    public DownloadFileTask(Activity activity)
+    public DownloadFileTask(Activity activity, String... prefixes)
     {
         this.activity = activity;
+        this.prefixes = prefixes;
     }
 
     @Override
@@ -29,24 +31,11 @@ public class DownloadFileTask extends AsyncTask<String, String, String>
     {
         try
         {
-            downloadFile(strings[0]);
-
-            ZipInputStream zip = new ZipInputStream(new FileInputStream(new File(external, "/temp/hbl.zip")));
-            ZipEntry entry = zip.getNextEntry();
-            while (entry != null)
+            for (int i = 0; i < prefixes.length; i++)
             {
-                File fileEntry = new File(external, "/temp/" + entry.getName());
-
-                if (!entry.isDirectory())
-                    extractFile(zip, fileEntry);
-                else
-                    fileEntry.mkdir();
-
-                zip.closeEntry();
-                entry = zip.getNextEntry();
+                downloadFile(strings[i], i);
+                extractZip(i);
             }
-
-            zip.close();
         }
         catch (IOException e)
         {
@@ -61,21 +50,26 @@ public class DownloadFileTask extends AsyncTask<String, String, String>
     {
         try
         {
-            File www = new File(MainActivity.external, "/temp/www/");
-            File dest = new File(MainActivity.external, "/payloads/");
-            File[] binaries = www.listFiles();
-
-            for (File bin : binaries)
+            for (int i = 0; i < prefixes.length; i++)
             {
-                String name = bin.getName();
-                if (name.contains("code550"))
-                    copyFile(bin, dest);
-                if (name.contains("code532"))
-                    copyFile(bin, dest);
-                if (name.contains("code500"))
-                    copyFile(bin, dest);
-                if (name.contains("code400"))
-                    copyFile(bin, dest);
+                File www = new File(MainActivity.external, "/temp/" + prefixes[i] + "/www/");
+                if (prefixes[i].equals("loadiine"))
+                    www = new File(MainActivity.external, "/temp/" + prefixes[i] + "/www/loadiine_gx2/");
+                File dest = new File(MainActivity.external, "/payloads/");
+                File[] binaries = www.listFiles();
+
+                for (File bin : binaries)
+                {
+                    String name = bin.getName();
+                    if (name.contains("code550"))
+                        copyFile(bin, new File(dest, prefixes[i] + "550.bin"));
+                    if (name.contains("code532"))
+                        copyFile(bin, new File(dest, prefixes[i] + "532.bin"));
+                    if (name.contains("code500"))
+                        copyFile(bin, new File(dest, prefixes[i] + "500.bin"));
+                    if (name.contains("code400"))
+                        copyFile(bin, new File(dest, prefixes[i] + "400.bin"));
+                }
             }
         }
         catch (Exception e)
@@ -110,14 +104,14 @@ public class DownloadFileTask extends AsyncTask<String, String, String>
         directory.delete();
     }
 
-    private void downloadFile(String string) throws IOException
+    private void downloadFile(String string, int index) throws IOException
     {
         URL url = new URL(string);
         URLConnection conn = url.openConnection();
         conn.connect();
 
         BufferedInputStream in = new BufferedInputStream(url.openStream());
-        File file = new File(external, "/temp/hbl.zip");
+        File file = new File(external, "/temp/" + prefixes[index] + ".zip");
         file.getParentFile().mkdirs();
         FileOutputStream out = new FileOutputStream(file);
         byte data[] = new byte[1024];
@@ -128,6 +122,30 @@ public class DownloadFileTask extends AsyncTask<String, String, String>
         out.flush();
         out.close();
         in.close();
+    }
+
+    private void extractZip(int index) throws IOException
+    {
+        ZipInputStream zip = new ZipInputStream(new FileInputStream(new File(external, "/temp/" + prefixes[index] + ".zip")));
+        ZipEntry entry = zip.getNextEntry();
+        File destDir = new File(external, "/temp/" + prefixes[index]);
+        if (!destDir.exists())
+            destDir.mkdirs();
+
+        while (entry != null)
+        {
+            File fileEntry = new File(destDir, entry.getName());
+
+            if (!entry.isDirectory())
+                extractFile(zip, fileEntry);
+            else
+                fileEntry.mkdir();
+
+            zip.closeEntry();
+            entry = zip.getNextEntry();
+        }
+
+        zip.close();
     }
 
     private void extractFile(ZipInputStream in, File file) throws IOException
@@ -145,7 +163,7 @@ public class DownloadFileTask extends AsyncTask<String, String, String>
     private void copyFile(File filePath, File fileDest) throws IOException
     {
         FileInputStream in = new FileInputStream(filePath);
-        FileOutputStream out = new FileOutputStream(fileDest + "/" + filePath.getName());
+        FileOutputStream out = new FileOutputStream(fileDest);
         byte[] buffer = new byte[1024];
         int length;
         while ((length = in.read(buffer)) > 0)

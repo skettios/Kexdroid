@@ -14,7 +14,7 @@ public class HaxServer implements Runnable
         {
             ServerSocket server = new ServerSocket(1337);
 
-            long clientCount = 0L;
+            int clientCount = 0;
 
             while (true)
             {

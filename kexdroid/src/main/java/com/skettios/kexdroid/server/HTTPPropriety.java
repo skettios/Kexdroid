@@ -9,9 +9,6 @@ public class HTTPPropriety
     {
         this.key = key;
         this.value = value;
-
-        System.out.println(key);
-        System.out.println(value);
     }
 
     public String getKey()

@@ -1,0 +1,46 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.1"
+
+    applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            output.outputFile = new File(output.outputFile.parent, output.outputFile.name.replace("-release", "-${variant.versionName}"))
+        }
+    }
+
+    defaultConfig {
+        applicationId "com.skettios.kexdroid"
+        minSdkVersion 19
+        targetSdkVersion 23
+        versionCode 4
+        versionName "0.4a"
+    }
+
+    signingConfigs {
+        release {
+            if (System.getenv("KEXDROID_KEYSTORE_PASSWORD") != null && System.getenv("KEXDROID_KEY_PASSWORD") != null) {
+                storeFile file("kexdroid.keystore")
+                storePassword System.getenv("KEXDROID_KEYSTORE_PASSWORD")
+                keyPassword System.getenv("KEXDROID_KEY_PASSWORD")
+                keyAlias "kexdroid"
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    sourceSets { main { assets.srcDirs = ['src/main/assets', 'src/main/assets'] } }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    testCompile 'junit:junit:4.12'
+    compile 'com.android.support:appcompat-v7:23.2.1'
+}
